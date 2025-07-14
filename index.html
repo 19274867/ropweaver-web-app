@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
@@ -47,25 +48,42 @@
           return;
         }
 
-        let output = `<div><strong>Found ${docs.length} gadget(s):</strong><br><br>`;
-        docs.forEach(doc => {
-          const g = doc.data();
-          output += `<div class="gadget-entry">`;
-          output += `<span><strong>File Name:</strong> ${g["file name"] || 'N/A'}</span>`;
-          output += `<span><strong>Hash:</strong> ${g.hash || 'N/A'}</span>`;
-          output += `<span><strong>Architecture:</strong> ${g.architecture || 'N/A'}</span>`;
-          output += `<span><strong>Instructions:</strong> <span class="highlight">${g.instructions || '[no instruction]'}</span></span>`;
-          output += `<span><strong>Offset:</strong> ${g.offset || 0}</span>`;
-          output += `<span><strong>Address:</strong> ${g.address || 'N/A'}</span>`;
-          output += `<span><strong>Category:</strong> ${g.category || 'N/A'}</span>`;
-          if (g.report_id && g.report_id !== '') {
-  		output += `<span><strong>Report ID:</strong> <a href="${g.report_id}.html" target="_blank">${g.report_id}</a></span>`;
-	  } else {
-  		output += `<span><strong>Report ID:</strong> N/A</span>`;
-  	  }
-          output += `</div>`;
-        });
-        output += `</div>`;
+      // Group gadgets by unique hash
+const grouped = new Map();
+
+docs.forEach(doc => {
+  const g = doc.data();
+  const key = g.hash;
+
+  // Only keep one gadget per unique hash
+  if (!grouped.has(key)) {
+    grouped.set(key, {
+      "file name": g["file name"],
+      "hash": g.hash,
+      "architecture": g.architecture,
+      "category": g.category,
+      "report_id": g.report_id
+    });
+  }
+});
+
+// HTML Output
+let output = `<div><strong>Found ${grouped.size} result(s) with unique hash(es):</strong><br><br>`;
+grouped.forEach(g => {
+  output += `<div class="gadget-entry">`;
+  output += `<span><strong>File Name:</strong> ${g["file name"] || 'N/A'}</span>`;
+  output += `<span><strong>Hash:</strong> ${g.hash || 'N/A'}</span>`;
+  output += `<span><strong>Architecture:</strong> ${g.architecture || 'N/A'}</span>`;
+  output += `<span><strong>Category:</strong> ${g.category || 'N/A'}</span>`;
+  if (g.report_id && g.report_id !== '') {
+    output += `<span><strong>Report ID:</strong> <a href="report.html?id=${g.report_id}" target="_blank">${g.report_id}</a></span>`;
+  } else {
+    output += `<span><strong>Report ID:</strong> N/A</span>`;
+  }
+  output += `</div>`;
+});
+output += `</div>`;
+
         resultBox.innerHTML = output;
       } catch (err) {
         resultBox.innerHTML = `<span class="error">Error fetching gadgets: ${err.message}</span>`;
@@ -120,6 +138,7 @@ total gadget database: ${totalCount}
       border: 1px solid #444;
       padding: 1em;
       font-family: monospace;
+      font-size: larger;
       white-space: pre-wrap;
       margin-top: 1em;
     }
@@ -166,7 +185,7 @@ ropweaver> Free online ROP gadgets search!
         </form>
 
         <div id="results" class="results-box">
-        	<span> &#9656; Type hash or file name to begin search.. (eg. fd635dde8a2c5df766008b4cc7a113ec) </span>
+        	<span> &#9656; Type hash or file name to begin search.. (eg. search: fd635dde8a2c5df766008b4cc7a113ec) </span>
         </div>
 
         <pre id="stats-output">
