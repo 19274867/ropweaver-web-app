@@ -1,67 +1,120 @@
+<!-- upload.html -->
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Upload | Free Online ROP Gadgets Search</title>
-<link rel="stylesheet" href="css/pure-min.css" />
-<link rel="stylesheet" href="css/skin-mine.css" />
+  <meta charset="utf-8">
+  <title>Upload | ROPWeaver</title>
+  <link rel="stylesheet" href="css/pure-min.css" />
+  <link rel="stylesheet" href="css/skin-mine.css" />
+
+  <!-- Firebase SDK (module) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDZ3BEfUstg32hqnbctG7X3LQ5onNJ98qs",
+    authDomain: "ropweaver.firebaseapp.com",
+    projectId: "ropweaver",
+    storageBucket: "ropweaver.appspot.com",
+    messagingSenderId: "356547989098",
+    appId: "1:356547989098:web:16a48b40d0bde270df8413",
+    measurementId: "G-CR1P508GPH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const storage = getStorage(app);
+
+  document.querySelector('form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const fileInput = document.querySelector('input[type="file"]');
+    if (!fileInput.files.length) {
+      alert('Please select a file first');
+      return;
+    }
+
+    const file = fileInput.files[0];
+    if (file.size > 4 * 1024 * 1024) { // 4MB limit
+      alert('File size exceeds 4MB limit');
+      return;
+    }
+
+    // Create a storage ref (store files under 'uploads/')
+    const storageRef = ref(storage, 'uploads/' + file.name);
+
+    try {
+      await uploadBytes(storageRef, file);
+      alert('File uploaded successfully!');
+    } catch (error) {
+      console.error('Upload failed', error);
+      alert('Upload failed: ' + error.message);
+    }
+  });
+</script>
+
+  <style>
+    #upload-status {
+      margin-top: 10px;
+      font-family: monospace;
+    }
+  </style>
 </head>
+
 <body class="pure-skin-mine">
 <div class="pure-g">
-    <div class="pure-u-1-24">
-    </div>
-    <div class="pure-u-22-24">
-        <div class="pure-menu pure-menu-open pure-menu-horizontal">
-    <a href="index.html" class="pure-menu-heading">ROPWeaver</a>
-    <ul>
+  <div class="pure-u-1-24"></div>
+  <div class="pure-u-22-24">
+    <div class="pure-menu pure-menu-open pure-menu-horizontal">
+      <a href="index.html" class="pure-menu-heading">ROPWeaver</a>
+      <ul>
         <li><a href="upload.html">Upload</a></li>
         <li><a href="search.html">Search</a></li>
         <li><a href="howto.html">Howto</a></li>
         <li><a href="about.html">About</a></li>
-    </ul>
-</div>
+      </ul>
+    </div>
 
-        <div class="content">
-        
+    <div class="content">
 <pre>
 > Maximum file size: 4MB
 > Support x86/x86_64/ARM arch with PE/ELF/MACHO format
 </pre>
 
-<form class="pure-form pure-form-aligned" method="post" enctype="multipart/form-data">
-    <fieldset>
-        <div class="pure-control-group">
-            <label for="name">Select a file</label>
-            <input name="upload" type="file">
-        </div>
-        <div class="pure-control-group">
-            <label for="raw" class="pure-checkbox">Raw binary</label>
-            <input name="raw" value="raw" type="checkbox">
-        </div>
-        <div class="pure-control-group">
-            <label for="arch">Custom arch</label>
-            <select name="arch" class="pure-input">
-                <option selected>auto</option>
-                <option>i386 (x86_32)</option>
-                <option>x86_64</option>
-                <option>arm</option>
-                <option>RISC-V</option>
-                <
-            </select>
-        </div>
-        <div class="pure-controls">
-            <button type="submit" class="pure-button">Upload</button>
-        </div>
-    </fieldset>
+<form class="pure-form pure-form-aligned" onsubmit="uploadFile(event)">
+  <fieldset>
+    <div class="pure-control-group">
+      <label>Select a file</label>
+      <input name="upload" type="file" required>
+    </div>
+    <div class="pure-control-group">
+      <label class="pure-checkbox">Raw binary</label>
+      <input name="raw" value="raw" type="checkbox">
+    </div>
+    <div class="pure-control-group">
+      <label>Custom arch</label>
+      <select name="arch" class="pure-input">
+        <option selected>auto</option>
+        <option>i386 (x86_32)</option>
+        <option>x86_64</option>
+        <option>arm</option>
+        <option>RISC-V</option>
+      </select>
+    </div>
+    <div class="pure-controls">
+      <button type="submit" class="pure-button">Upload</button>
+    </div>
+    <div id="upload-status"></div>
+  </fieldset>
 </form>
 
 
 <pre>
-ropshell> recent
+ropweaver> recent
 hash                             name                 arch   type   count
 -------------------------------------------------------------------------
 <a href="#">cb2ec8bf3b3bcece58257652058e8900</a> vdso                 x86_64 RAW    0
-<a href="./fd635dde8a2c5df766008b4cc7a113ec.html">fd635dde8a2c5df766008b4cc7a113ec</a> p3                   x86_64 ELF    1
+<a href="#">fd635dde8a2c5df766008b4cc7a113ec</a> p3                   x86_64 ELF    1
 <a href="#">73a5955536966c7f1295d38d55e3a79d</a> ROPiah               x86_64 ELF    0
 <a href="#">51c97047f59c2c041b4cb68669698571</a> rsp.out              x86_64 ELF    0
 <a href="#">3c54b2579e5d25e951162f220b0917c8</a> p1                   x86_64 ELF    0
